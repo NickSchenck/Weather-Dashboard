@@ -1,0 +1,8 @@
+header h1 {
+    text-align: center;
+}
+#search-section {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
