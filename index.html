@@ -9,10 +9,10 @@
 </head>
 <body>
     <header><h1>Weather Dashboard</h1></header>
-    <div id="search-section"><h2>Search a city:</h2>
-        <form id="">
-            <input type="text" placeholder="Search Here">
-            <button>Search</button>
+    <div id="search-container"><h2>Search a city:</h2>
+        <form  id="search-section">
+            <input id="search-area" type="text" placeholder="Search Here">
+            <button id="search-btn">Search</button>
         </form>
         
         <hr>
@@ -20,12 +20,12 @@
 
         </div>
     </div>
-    <div>
-            <h3></h3>
-            <p></p>
-            <p></p>
-            <p></p>
-            <p></p>
+    <div id="city-readout" class="">
+            <h3 id="city-searched">Exa city</h3>
+            <p id="city-temp">Temp:</p>
+            <p id="city-wind">Wind:</p>
+            <p id="city-humid">Humidity:</p>
+            <p id="city-uv">UV Index:</p>
     </div>
     <div>
         <h3>5-Day Forecast:</h3>

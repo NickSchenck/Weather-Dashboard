@@ -1,0 +1,24 @@
+header h1 {
+    text-align: center;
+    background-color:cornflowerblue;
+}
+#search-container{
+    display: inline-block;
+}
+#search-section {
+    display: inline-block;
+    font-size: larger;
+}
+#search-area{
+    font-size: larger;
+}
+#search-btn{
+    display: block;
+    font-size: larger;
+    background-color: cornflowerblue;
+}
+#city-readout{
+    display: inline-block;
+    margin: 0 0 0 45px;
+    border: 1px black;
+}
