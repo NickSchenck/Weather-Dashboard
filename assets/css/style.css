@@ -6,8 +6,14 @@ header h1 {
     display: inline-block;
 }
 #search-section {
-    display: inline-block;
+    display: flex;
+    flex-direction: column;
     font-size: larger;
+}
+#seach-history{
+    display: flex;
+    flex-direction: column;
+    margin: 5px;
 }
 #search-area{
     font-size: larger;
@@ -20,5 +26,8 @@ header h1 {
 #city-readout{
     display: inline-block;
     margin: 0 0 0 45px;
-    border: 1px black;
+    border: solid 1px black;
+}
+#five-readout{
+    display: flex;
 }

@@ -13,22 +13,35 @@ THEN I am again presented with current and future conditions for that city */
 
 var searchSection = document.querySelector("#search-section");
 var searchCity = document.querySelector("#search-area");
+var time = moment(new Date()).format("DD/MM/YYYY");
+console.log(time);
 // var cityLat =
 // var cityLon =
-
+//need to get city name from the search and plug it into the API call to get inital info
 
 
 // var getWeather = function(){
 //     fetch("https://api.openweathermap.org/data/2.5/onecall?lat=" + + "&lon=" + + "&exclude={part}&appid=88492f617957986cb392da3e78550452");
-// }; lat and lon will need to be grabbed from a city which is searched
+// }; 
 
 var formSubmitHandler = function(event) {
     event.preventDefault();
     // console.log(event);
     var city = searchCity.value.trim();
-    if(city){
-
+    // console.log(city)
+    if(city === ""){
+      alert("You must enter a valid city")
     }
+    var citySave = document.createElement("button")
+    citySave.innerText = city;
+    document.getElementById("search-history").appendChild(citySave);
+    document.getElementById("city-searched").innerText = city + time;
+    var getWeather = fetch("https://api.openweathermap.org/data/2.5/weather?q=" + city + "&appid=88492f617957986cb392da3e78550452&units=metric").then(response => response.json())
+    .then(data => console.log(data));
+    Array.from(getWeather);
+    // console.log(getWeather);
+    document.getElementById("city-temp").innerText = "Temp:" + getWeather.main;
   };
+var 
 
   searchSection.addEventListener("submit", formSubmitHandler);
