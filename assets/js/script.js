@@ -13,35 +13,57 @@ THEN I am again presented with current and future conditions for that city */
 
 var searchSection = document.querySelector("#search-section");
 var searchCity = document.querySelector("#search-area");
-var time = moment(new Date()).format("DD/MM/YYYY");
-console.log(time);
-// var cityLat =
-// var cityLon =
-//need to get city name from the search and plug it into the API call to get inital info
+var time = moment(new Date()).format("MM/DD/YYYY");
 
+// console.log(time);
 
-// var getWeather = function(){
-//     fetch("https://api.openweathermap.org/data/2.5/onecall?lat=" + + "&lon=" + + "&exclude={part}&appid=88492f617957986cb392da3e78550452");
-// }; 
+var formSubmitHandler = function (event) {
+  event.preventDefault();
+  // console.log(event);
+  var city = searchCity.value.trim();
+  // console.log(city)
+  if (city === "") {
+    alert("You must enter a valid city")
+  }
+  var citySave = document.createElement("button");
+  citySave.classList.add("d-flex", "flex-column", "align-items-stretch", "border-0", "bg-secondary", "w-100", "text-center", "mt-2", "rounded");
+  citySave.innerText = city;
+  document.getElementById("search-history").appendChild(citySave);
+  document.getElementById("city-searched").innerText = city + " " + time;
+  fetch("https://api.openweathermap.org/data/2.5/weather?q=" + city + "&appid=88492f617957986cb392da3e78550452&units=imperial")
+    .then(response =>
+      response.json()
+    )
+    .then(data =>
+      displayWeather(data)//This is what allows data to be defined outside the scope its in
+    );
 
-var formSubmitHandler = function(event) {
-    event.preventDefault();
-    // console.log(event);
-    var city = searchCity.value.trim();
-    // console.log(city)
-    if(city === ""){
-      alert("You must enter a valid city")
-    }
-    var citySave = document.createElement("button")
-    citySave.innerText = city;
-    document.getElementById("search-history").appendChild(citySave);
-    document.getElementById("city-searched").innerText = city + time;
-    var getWeather = fetch("https://api.openweathermap.org/data/2.5/weather?q=" + city + "&appid=88492f617957986cb392da3e78550452&units=metric").then(response => response.json())
-    .then(data => console.log(data));
-    Array.from(getWeather);
-    // console.log(getWeather);
-    document.getElementById("city-temp").innerText = "Temp:" + getWeather.main;
-  };
-var 
+};
 
-  searchSection.addEventListener("submit", formSubmitHandler);
+displayWeather = function (data) {
+  var cityLat = data.coord.lat;
+  var cityLon = data.coord.lon;
+  // console.log(cityLon);
+  fetch("https://api.openweathermap.org/data/2.5/onecall?lat=" + cityLat + "&lon=" + cityLon + "&appid=88492f617957986cb392da3e78550452&units=imperial")
+    .then(response =>
+      response.json()
+    )
+    .then(data =>
+      (data));
+  // console.log(UVI);
+  document.getElementById("city-temp").innerText = "Temp: " + data.main.temp + "°F";
+  document.getElementById("city-wind").innerText = "Wind: " + data.wind.speed + "MPH";
+  document.getElementById("city-humid").innerText = "Humidity: " + data.main.humidity + "%";
+  document.getElementById("city-uv").innerText = "UV Index: " + data.current.uvi;
+};
+
+// historyClick = function(){
+  
+// };
+
+searchSection.addEventListener("submit", formSubmitHandler);
+
+//API call on 47 isn't wanting to be put into an array like the one on 33
+//Unsure how to populate appropriate fields when a history item is clicked
+//unsure how to iterate the date in order to write to the 5-day forecast
+//unsure of how to get info from the API which is a day or more ahead of current call, in order to write to 5-day forecast
