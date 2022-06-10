@@ -14,14 +14,11 @@ THEN I am again presented with current and future conditions for that city */
 var searchSection = document.querySelector("#search-section");
 var searchCity = document.querySelector("#search-area");
 var time = moment(new Date()).format("MM/DD/YYYY");
-
-// console.log(time);
+var historyClicked = document.querySelector("#search-history");
 
 var formSubmitHandler = function (event) {
   event.preventDefault();
-  // console.log(event);
   var city = searchCity.value.trim();
-  // console.log(city)
   if (city === "") {
     alert("You must enter a valid city")
   }
@@ -31,38 +28,60 @@ var formSubmitHandler = function (event) {
   document.getElementById("search-history").appendChild(citySave);
   document.getElementById("city-searched").innerText = city + " " + time;
   fetch("https://api.openweathermap.org/data/2.5/weather?q=" + city + "&appid=88492f617957986cb392da3e78550452&units=imperial")
-    .then(response =>
-      response.json()
-    )
-    .then(data =>
-      displayWeather(data)//This is what allows data to be defined outside the scope its in
-    );
+  .then(function (response) {
+    return response.json();
+  })
+  .then(function (data) {
+      
+      getLatLon(data)
+      // console.log(data);
+    });
 
 };
 
-displayWeather = function (data) {
-  var cityLat = data.coord.lat;
-  var cityLon = data.coord.lon;
-  // console.log(cityLon);
-  fetch("https://api.openweathermap.org/data/2.5/onecall?lat=" + cityLat + "&lon=" + cityLon + "&appid=88492f617957986cb392da3e78550452&units=imperial")
-    .then(response =>
-      response.json()
-    )
-    .then(data =>
-      (data));
-  // console.log(UVI);
-  document.getElementById("city-temp").innerText = "Temp: " + data.main.temp + "°F";
-  document.getElementById("city-wind").innerText = "Wind: " + data.wind.speed + "MPH";
-  document.getElementById("city-humid").innerText = "Humidity: " + data.main.humidity + "%";
-  document.getElementById("city-uv").innerText = "UV Index: " + data.current.uvi;
+var getLatLon = function (data) {
+    var lat = data.coord.lat;
+    var lon = data.coord.lon;
+    getWeather(lat, lon);
+  //function to get coordinates
 };
 
-// historyClick = function(){
-  
-// };
+var getWeather = function (lat, lon) {
+  //function to get weather
+  //need to clean up api request to limit payload
+  fetch("https://api.openweathermap.org/data/2.5/onecall?lat=" + lat + "&lon=" + lon + "&appid=88492f617957986cb392da3e78550452&units=imperial")
+  .then(function (response) {
+    return response.json();
+  })
+  .then(function (data) {
+      // console.log(data.current.uvi);
+      displayWeather(data)
+      console.log(data);
+    });
+}
+
+var displayWeather = function (weather) {
+  // console.log(data);
+  document.getElementById("city-temp").innerText = "Temp: " + weather.current.temp + "°F";
+  document.getElementById("city-wind").innerText = "Wind: " + weather.current.wind_speed + "MPH";
+  document.getElementById("city-humid").innerText = "Humidity: " + weather.current.humidity + "%";
+  document.getElementById("city-uv").innerText = "UV Index: " + weather.current.uvi;
+  for(i = 0; i < 5; i++){
+    if(i === 0){
+      var date = new Date(weather.daily[0].dt).toLocaleDateString("en-US")
+      document.getElementById("date1").innerHTML = date;
+      document.getElementById("icon1").innerHTML = weather.daily[0].weather[0].icon;
+      document.getElementById("temp1").innerText = "Temp: " + weather.daily[0].temp.day + "°F";
+      document.getElementById("wind1").innerText = "Wind: " + weather.daily[0].wind_speed + "MPH";
+      document.getElementById("humid1").innerText = "Humidity: " + weather.daily[0].humidity + "%";
+    }
+  }
+  console.log(weather.daily[i].temp.day);
+  //create for loop to iterate through the five day forecast
+};
 
 searchSection.addEventListener("submit", formSubmitHandler);
-
+// historyClicked.addEventListener("click", displayWeather());
 //API call on 47 isn't wanting to be put into an array like the one on 33
 //Unsure how to populate appropriate fields when a history item is clicked
 //unsure how to iterate the date in order to write to the 5-day forecast
