@@ -1,104 +1,113 @@
-dayjs.extend(window.dayjs_plugin_utc);      //First two lines enable dayjs to iterate through dates in the five day forecast
+dayjs.extend(window.dayjs_plugin_utc);
 dayjs.extend(window.dayjs_plugin_timezone);
 let searchSection = document.querySelector("#search-section");
+let fullForecastSection = document.getElementById("five-readout");
 
-let time = moment(new Date()).format("MM/DD/YYYY");     //This line uses moment.js to determine the current days date in the inital city display
+let time = moment(new Date()).format("MM/DD");
+let currentDay = new Date().toLocaleString('en-us', {  weekday: 'long' });
 let historyClicked = document.querySelector("#search-history");
 let baseURL = "http://api.openweathermap.org/data/2.5/";
 let apiKey = "88492f617957986cb392da3e78550452";
 let searchCity = document.querySelector("#search-area");
 let city = searchCity.value.trim();
-//complete_url = base_url + "appid=" + api_key + "&q=" + city_name
 
 function formSubmitHandler(event) {
   event.preventDefault();
-       //Lines 9-13 prevent the page from reloading, get the value of the search box, and prevent the user from entering an empty response
+
   if (city === "") {
     alert("You must enter a valid city.")
-  }
+  };
   let citySave = document.createElement("button");
-  citySave.classList.add("d-flex", "flex-column", "align-items-stretch", "border-0", "bg-secondary", "w-100", "text-center", "mt-2", "rounded");    //lines 14-17 display the searched city as a button
+  citySave.classList.add("d-flex", "flex-column", "align-items-stretch", "border-0", "bg-secondary", "w-100", "text-center", "mt-2", "rounded");
   citySave.innerText = city;
   document.getElementById("search-history").appendChild(citySave);
-  document.getElementById("city-searched").innerText = city + " " + time;
+  document.getElementById("city-searched").innerText = `${city}, ${currentDay}, ${time}`;
   getWeather();
 };
 
-/*Both API calls here seem to be working as structured, but I think I'll want to break them up into different functions. One idea that
-immediatly seems better is to have two functions called by getWeather. The first function, displayWeather is already being called. The
-second function, maybe something like determineFullForecast, would also recieve data while being called from getWeather, and would be
-intended to select specific points of data from the large response we get, then package that into an object which we could pass to a
-function that'd display the 5-day forecast.*/
 function getWeather(){
-  fetch(`${baseURL}weather?appid=${apiKey}&q=${city}&units=imperial`)   //lines 18-26 display the city and date in inital results box and makes an API call using the cities name as a parameter
+
+  fetch(`${baseURL}weather?appid=${apiKey}&q=${city}&units=imperial`)
     .then(function (response) {
       return response.json();
     })
     .then(function (data) {
-      let lat = data.coord.lat
-      let lon = data.coord.lon
-      fetch(`${baseURL}forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&units=imperial`)//api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={lon}&appid={API key}
-        .then(function(response){
-          return response.json();
-        })
-        .then(function(data){
-          console.log(data)
-          displayWeather(data);
-        });
+      displayWeather(data);
+      getFullForecast(data);
     });
 };
-//.then(function (data) {
-//   displayWeather(data)
-// });
 
-/*We're going to need to look into tutorials on how to interact with the openweather API website. I think they may have changed how things
-work on their end, and we will need to update accordingly.*/
-// let getLatLon = function (data) {
-//   let tz =  data.timezone;
-//   let lat = data.coord.lat;       //This function gets us our Timezone, and coordinates
-//   let lon = data.coord.lon;
-//   getWeather(lat, lon, tz);
-// };
+function getFullForecast(weather){
+  let lat = weather.coord.lat;
+  let lon = weather.coord.lon;
 
-// let getWeather = function (lat, lon, tz) {
-//   fetch(`${baseURL}appid=${apiKey}&q=${city}`)  //this function uses coordinates as parameters for an API call to get weather data
-//     .then(function (response) {
-//       return response.json();
-//     })
-//     .then(function (data) {
-//       displayWeather(data, tz)
-//       // console.log(dayjs().tz(tz).add(1, "day").startOf("day").format("M/D/YYYY"))
-//     });
-// };
+  fetch(`${baseURL}forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&units=imperial`)
+    .then(function(response){
+      return response.json();
+    })
+    .then(function(data){
+      determineFullForecast(data);
+    });
+};
 
-// fetch("https://api.openweathermap.org/data/2.5/onecall?lat=" + lat + "&lon=" + lon + "&appid=88492f617957986cb392da3e78550452&units=imperial")  //this function uses coordinates as parameters for an API call to get weather data
-// .then(function (response) {
-//   return response.json();
-// })
-// .then(function (data) {
-//   displayWeather(data, tz)
-//   // console.log(dayjs().tz(tz).add(1, "day").startOf("day").format("M/D/YYYY"))
-// });
-// }
+function determineFullForecast(data){
+  let fiveDayForecast = [];
+
+  for(let i = 0; i < data.list.length; i++){
+    if(data.list[i].dt_txt[12] === `5`){
+      fiveDayForecast.push(data.list[i]);
+    };
+  };
+  displayFullForecast(fiveDayForecast);
+};
+
+function displayFullForecast(weather){
+  fullForecastSection.classList.remove("hide");
+  fullForecastSection.classList.add("d-flex");
+  for(let i = 0; i < 5; i++){
+    let dateConversion = new Date(weather[i].dt*1000);
+    let day = dateConversion.toDateString().slice(0, 3);
+    let date = weather[i].dt_txt.slice(5, 11);
+    let icon = weather[i].weather[0].icon;
+    let iconEl = document.createElement("img");
+    iconEl.src = `http://openweathermap.org/img/w/${icon}.png`;
+    document.getElementById("date" + (i + 1)).innerHTML = `${day}, ${date}`;
+    document.getElementById("icon" + (i + 1)).appendChild(iconEl);
+    document.getElementById("temp" + (i + 1)).innerText = `Temp: ${weather[i].main.temp}°F`;
+    document.getElementById("wind" + (i + 1)).innerText = `Wind: ${weather[i].wind.speed}MPH`;
+    document.getElementById("humid" + (i + 1)).innerText = `Humidity: ${weather[i].main.humidity}%`;
+  };
+};
 
 function displayWeather(weather) {
-  // console.log(weather)
   document.getElementById("city-temp").innerText = "Temp: " + weather.main.temp + "°F";
-  document.getElementById("city-wind").innerText = "Wind: " + weather.wind.speed + "MPH";     //lines 48-51 display weather data in the inital results box
+  document.getElementById("city-wind").innerText = "Wind: " + weather.wind.speed + "MPH";
   document.getElementById("city-humid").innerText = "Humidity: " + weather.main.humidity + "%";
-  document.getElementById("city-uv").innerText = "UV Index: " + weather.current.uvi;
-  for(i = 0; i < 5; i++){ //this for loop was determining where specific information of the 5-day forecast was being displayed
-    // let date = dayjs().tz(tz).add(i, "day").startOf("day").format("M/D/YYYY");
-  document.getElementById("date" + (i + 1)).innerHTML = date;
-  icon = weather.daily[(i + 1)].weather[0].icon;
-  let iconEl = document.createElement("img");
-  iconEl.src = 'http://openweathermap.org/img/wn/' + icon + '.png'        //This for loop iterates through the 5-day forecast, writing all applicable info to associated fields
-  document.getElementById("icon" + (i + 1)).appendChild(iconEl);
-  document.getElementById("temp" + (i + 1)).innerText = "Temp: " + weather.daily[i].temp.day + "°F";
-  document.getElementById("wind" + (i + 1)).innerText = "Wind: " + weather.daily[i].wind_speed + "MPH";
-  document.getElementById("humid" + (i + 1)).innerText = "Humidity: " + weather.daily[i].humidity + "%";
-  }
 };
 
 searchSection.addEventListener("submit", formSubmitHandler);
 historyClicked.addEventListener("click", displayWeather);
+
+/*TODO:
+
+  Impliment results for our 5-day forecast
+    -potentially add ability to change which forecast for a given block of time is being displayed(morning, afternoon, evening, night)
+  
+  Ability to search other cities without a page refresh
+    -ability to delete saved cities upon button press
+  
+  Eliminate the duplication of previously searched cities as saved search terms
+
+  Re-implimentation of the small weather-graphics that were previously used(cloudy symbol, sunny symbol, clear symbol)
+    -vaguely remember there being a duplication issue with these
+    -ensure they're being used in the main, current-day, forecast readout
+
+  More user feedback
+    -maybe a prompt/alert if city names are spelled incorrectly
+    -label for the section containing previously searched cities
+    -possibly display a button which would allow the user to see the 5-day forecast, rather than an empty chart(basic DOM manipulation)
+
+  Likely some CSS touch-ups and changes
+    -Will have to look at and refamiliarize myself with bootstrap, probably want to continue styling this app with it
+    -considering combining the date and icon rows in 5-day forecast 
+ */

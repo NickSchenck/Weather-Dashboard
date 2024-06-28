@@ -1,26 +1,36 @@
 * {
     margin: 0 2px 0 2px;
 }
+
 header h1 {
     text-align: center;
     background-color:cornflowerblue;
 }
+
+.hide{
+    display: none;
+}
+
 #search-container{
     display: inline-block;
 }
+
 #search-section {
     display: flex;
     flex-direction: column;
     font-size: larger;
 }
+
 #seach-history{
     display: flex;
     flex-direction: column;
     margin: 5px;
 }
+
 #search-area{
     font-size: larger;
 }
+
 #search-btn{
     display: block;
     font-size: larger;
@@ -28,12 +38,11 @@ header h1 {
     border: none;
     margin: 5px;
 }
+
 #city-readout{
     display: inline-block;
     margin: 0 0 0 45px;
     border: solid 1px black;
     width: 560px;
 }
-#five-readout{
-    display: flex;
-}
+
