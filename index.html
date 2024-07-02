@@ -23,7 +23,8 @@
 
         <hr>
         <div id="search-history">
-
+            <h3>Searched cities:</h3>
+            <!-- <div id="delete-buttons"></div> -->
         </div>
     </section>
     <section id="city-readout" class="">
@@ -33,11 +34,16 @@
         <p id="city-humid">Humidity:</p>
     </section>
     <section id="five-readout" class="hide">
-        <h3>5-Day Forecast:</h3>
+        <div id="five-day-header" class="w-100"><h3>5-Day Forecast:</h3>
+            <button id="morning" class="forecast-times">Morning</button>
+            <button id="afternoon" class="forecast-times">Afternoon</button>
+            <button id="evening" class="forecast-times">Evening</button>
+            <button id="night" class="forecast-times">Night</button>
+        </div>
         <div id="card-1" class="card bg-secondary ml-3">
             <ul class="list-group list-group-flush">
                 <li class="list-group-item" id="date1">Date</li>
-                <li class="list-group-item" id="icon1"></li>
+                <img class="list-group-item" id="icon1"></img>
                 <li class="list-group-item" id="temp1">Temp:</li>
                 <li class="list-group-item" id="wind1">Wind:</li>
                 <li class="list-group-item" id="humid1">Humidity:</li>
@@ -47,7 +53,7 @@
         <div id="card-2" class="card bg-secondary ml-3">
             <ul class="list-group list-group-flush">
                 <li class="list-group-item" id="date2">Date</li>
-                <li class="list-group-item" id="icon2"></li>
+                <img class="list-group-item" id="icon2"></img>
                 <li class="list-group-item" id="temp2">Temp:</li>
                 <li class="list-group-item" id="wind2">Wind:</li>
                 <li class="list-group-item" id="humid2">Humidity:</li>
@@ -56,7 +62,7 @@
         <div id="card-3" class="card bg-secondary ml-3">
             <ul class="list-group list-group-flush">
                 <li class="list-group-item" id="date3">Date</li>
-                <li class="list-group-item" id="icon3"></li>
+                <img class="list-group-item" id="icon3"></img>
                 <li class="list-group-item" id="temp3">Temp:</li>
                 <li class="list-group-item" id="wind3">Wind:</li>
                 <li class="list-group-item" id="humid3">Humidity:</li>
@@ -65,7 +71,7 @@
         <div id="card-4" class="card bg-secondary ml-3">
             <ul class="list-group list-group-flush">
                 <li class="list-group-item" id="date4">Date</li>
-                <li class="list-group-item" id="icon4"></li>
+                <img class="list-group-item" id="icon4"></img>
                 <li class="list-group-item" id="temp4">Temp:</li>
                 <li class="list-group-item" id="wind4">Wind:</li>
                 <li class="list-group-item" id="humid4">Humidity:</li>
@@ -74,7 +80,7 @@
         <div id="card-5" class="card bg-secondary ml-3">
             <ul class="list-group list-group-flush">
                 <li class="list-group-item" id="date5">Date</li>
-                <li class="list-group-item" id="icon5"></li>
+                <img class="list-group-item" id="icon5"></img>
                 <li class="list-group-item" id="temp5">Temp:</li>
                 <li class="list-group-item" id="wind5">Wind:</li>
                 <li class="list-group-item" id="humid5">Humidity:</li>

@@ -7,6 +7,14 @@ header h1 {
     background-color:cornflowerblue;
 }
 
+button{
+    background-color: cornflowerblue;
+}
+
+button:hover {
+    background-color: rgb(165, 187, 229);
+}
+
 .hide{
     display: none;
 }
@@ -34,9 +42,9 @@ header h1 {
 #search-btn{
     display: block;
     font-size: larger;
-    background-color: cornflowerblue;
     border: none;
     margin: 5px;
+    border-radius: .25rem;
 }
 
 #city-readout{
@@ -46,3 +54,10 @@ header h1 {
     width: 560px;
 }
 
+#five-day-header{
+    display: block ruby;
+}
+
+#five-day-header button{
+    border-radius: .25rem;
+}
