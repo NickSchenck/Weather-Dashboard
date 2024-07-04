@@ -1,7 +1,3 @@
-* {
-    margin: 0 2px 0 2px;
-}
-
 header h1 {
     text-align: center;
     background-color:cornflowerblue;
@@ -17,6 +13,11 @@ button:hover {
 
 .hide{
     display: none;
+}
+
+.delete-button{
+    float: right;
+    margin-right: 25px;
 }
 
 #search-container{
@@ -42,7 +43,6 @@ button:hover {
 #search-btn{
     display: block;
     font-size: larger;
-    border: none;
     margin: 5px;
     border-radius: .25rem;
 }
@@ -60,4 +60,10 @@ button:hover {
 
 #five-day-header button{
     border-radius: .25rem;
+}
+
+#main-icon{
+    float: right;
+    height: 120px;
+    margin: 0 30px 5px 0;
 }

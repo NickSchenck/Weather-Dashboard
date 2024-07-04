@@ -1,18 +1,22 @@
 dayjs.extend(window.dayjs_plugin_utc);
 dayjs.extend(window.dayjs_plugin_timezone);
-let searchSection = document.querySelector("#search-section");
+let searchSection = document.getElementById("search-section");
 let fullForecastSection = document.getElementById("five-readout");
-//let deleteButtonContainer = document.getElementById("delete-buttons");
 let forecastTimes = document.querySelectorAll(".forecast-times");
+let availableStates = document.querySelectorAll(".available-states");
+let cityDeleteButton = document.getElementById("delete-button");
+let userSelection = document.getElementById("user-selection");
+// let stateConfirmation = document.getElementById("state-confirm");
 
 let time = moment(new Date()).format("MM/DD");
 let timeForForecast = `5`;
 let currentDay = new Date().toLocaleString('en-us', {  weekday: 'long' });
-let historySection = document.querySelector("#search-history");
+let historySection = document.getElementById("search-history");
 let baseURL = "http://api.openweathermap.org/data/2.5/";
 let apiKey = "88492f617957986cb392da3e78550452";
-let searchCity = document.querySelector("#search-area");
+let searchCity = document.getElementById("search-area");
 let allSearchedCities = [];
+let globalData;
 
 function formSubmitHandler() {
   let city = searchCity.value.trim();
@@ -21,29 +25,86 @@ function formSubmitHandler() {
   if (city === "") {
     alert("You must enter a valid city.")
   };
+  let cityCell = document.createElement("div");
   let citySave = document.createElement("button");
-  //let deleteButton = document.createElement("button");
-  citySave.classList.add("d-flex", "justify-content-center", "align-items-stretch", "border-0", "w-75", "text-center", "mt-2", "rounded");
+  let deleteButton = document.createElement("button");
+  citySave.classList.add("d-flex", "justify-content-center", "align-items-stretch", "w-75", "text-center", "mt-2", "rounded");
   citySave.innerText = city;
-  //deleteButton.classList.add("w-25", "justify-content-end");
-  //deleteButton.innerText = `Del`;
-  // citySave.appendChild(deleteButton);
+  deleteButton.classList.add("rounded", "delete-button");
+  deleteButton.innerText = `Del`;
+  
 
   if(allSearchedCities.includes(city)){
-    console.log(`Saved`);
+    window.alert(`City is saved`);
   }else{
-    historySection.appendChild(citySave);
-    //deleteButtonContainer.appendChild(deleteButton);
+    allSearchedCities.push(city);
+    historySection.appendChild(cityCell);
+    cityCell.appendChild(deleteButton);
+    cityCell.appendChild(citySave);
   };
-  allSearchedCities.push(city);
-  
   getWeather(city);
+  getUserChoice(city);
 
   citySave.addEventListener("click", (event)=>{
     let cityToSearch = event.target.innerText;
     getWeather(cityToSearch);
   });
+
+  deleteButton.addEventListener("click", (event)=>{
+    let parentElement = event.target.parentElement;
+    parentElement.remove();
+    allSearchedCities = allSearchedCities.filter((city) => city !== parentElement.children[1].innerText);
+  });
 };
+/*http://api.openweathermap.org/geo/1.0/reverse?lat={lat}&lon={lon}&limit={limit}&appid={API key}
+  http://api.openweathermap.org/geo/1.0/direct?q={city name},{state code},{country code}&limit={limit}&appid={API key} 
+  
+  shuffle(array.answers).forEach((answer) => {
+    let button = document.createElement("button");
+    button.innerText = answer.option;
+    answerButtons.appendChild(button);
+    button.classList.add("btn", "disableBtn");
+    button.addEventListener("click", answerSelected);
+    button.addEventListener("click", isCorrect);
+  });*/
+
+function getUserChoice(city){
+  userSelection.classList.remove("hide");
+
+  fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${city}&limit=5&appid=${apiKey}`)
+    .then(function(response){
+      return response.json();
+    })
+    .then(function(data){
+      userSelection.innerText = `Which state is ${city} located in?`
+      console.log(data);
+      data.forEach((entry) =>{
+        let button = document.createElement("button");
+        button.classList.add("available-states");
+        button.innerText = entry.state;
+        
+        userSelection.appendChild(button);
+      });
+      /*Need to determine the city the user selects, THEN ensure that only the information related to that selection is passed to a
+      function that makes an API call w/ lat&lon of the selected city*/
+      
+    });
+};
+
+console.log(availableStates)
+for(let i = 0; i < availableStates.length; i++){
+  availableStates[i].addEventListener("click", (event)=>{
+    let chosenState = event.target.innerText;
+    console.log(chosenState);
+  })
+}
+/*data.forEach((entry) =>{
+        let button = document.createElement("button");
+        button.classList.add("available-states");
+        button.innerText = entry.state;
+        
+        userSelection.appendChild(button);
+      }); */
 
 function getWeather(city){
   document.getElementById("city-searched").innerText = `${city}, ${currentDay}, ${time}`;
@@ -57,52 +118,43 @@ function getWeather(city){
       getFullForecast(data);
     });
 };
+/*function getWeather(city){
+  document.getElementById("city-searched").innerText = `${city}, ${currentDay}, ${time}`;
+
+  fetch(`${baseURL}weather?appid=${apiKey}&q=${city}&units=imperial`)
+    .then(function (response) {
+      return response.json();
+    })
+    .then(function (data) {
+      displayWeather(data);
+      getFullForecast(data);
+    });
+}; */
 
 function getFullForecast(weather){
-  // console.log(weather)
   let lat = weather.coord.lat;
   let lon = weather.coord.lon;
-
+/*https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={API key} */
   fetch(`${baseURL}forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&units=imperial`)
     .then(function(response){
       return response.json();
     })
     .then(function(data){
-      determineFullForecast(data); //This is where I should try targeting a global variable for saving data to
+      globalData = data;
+      determineFullForecast();
     });
 };
 
-function determineFullForecast(data){
-  // console.log(data);
+function determineFullForecast(){
   let fiveDayForecast = [];
 
-  for(let i = 0; i < data.list.length; i++){
-    if(data.list[i].dt_txt[12] === timeForForecast){ //This is targeting a block-of-time within our returned object
-      fiveDayForecast.push(data.list[i]);
+  for(let i = 0; i < globalData.list.length; i++){
+    if(globalData.list[i].dt_txt[12] === timeForForecast){
+      fiveDayForecast.push(globalData.list[i]);
     };
   };
   displayFullForecast(fiveDayForecast);
-  /*Techincally working, but has a major issue with repeating exponentially. This noticably slows down the page after a handful of clicks */
-  for(let i = 0; i < forecastTimes.length; i++){
-    forecastTimes[i].addEventListener("click", (event)=>{
-      let timeToForecast = event.target.innerText;
-      console.log(timeToForecast); //forecastTimes is being repeated exponentially whenever a time-selecting button is pressed
-      if(timeToForecast === "Morning"){
-        determineFullForecast(data, `5`);
-      }else if(timeToForecast === "Afternoon"){
-        determineFullForecast(data, `1`);
-      }else if(timeToForecast === "Evening"){
-        determineFullForecast(data, `3`)
-      }else if(timeToForecast === "Night"){
-        determineFullForecast(data, `6`);
-      };
-    });
-  }; ////answerButtons.removeChild(answerButtons.firstChild); forecastTimes.removeChild(forecastTimes.firstChild);
 };
-//let buttons = document.querySelectorAll(".next");
-// for(let i = 0; i < buttons.length; i++) {
-//   buttons[i].addEventListener("click", yourFunction);
-// }
 
 function displayFullForecast(weather){
   fullForecastSection.classList.remove("hide");
@@ -121,6 +173,8 @@ function displayFullForecast(weather){
 };
 
 function displayWeather(weather) {
+  let icon = weather.weather[0].icon;
+  document.getElementById("main-icon").src = `http://openweathermap.org/img/w/${icon}.png`;
   document.getElementById("city-temp").innerText = "Temp: " + weather.main.temp + "°F";
   document.getElementById("city-wind").innerText = "Wind: " + weather.wind.speed + "MPH";
   document.getElementById("city-humid").innerText = "Humidity: " + weather.main.humidity + "%";
@@ -128,42 +182,32 @@ function displayWeather(weather) {
 
 searchSection.addEventListener("submit", formSubmitHandler);
 
-/*This implimentation of time-selecting buttons for the 5-day forecast would likely need a global variable, to which our data-containing
-object that determineFullForecast usually uses could be saved. */
-// for(let i = 0; i < forecastTimes.length; i++){
-//   forecastTimes[i].addEventListener("click", (event)=>{
-//     let timeToForecast = event.target.innerText;
-//     console.log(timeToForecast); //forecastTimes is being repeated exponentially whenever a time-selecting button is pressed
-//     if(timeToForecast === "Morning"){
-//       timeForForecast = `5`;
-//       determineFullForecast();
-//     }else if(timeToForecast === "Afternoon"){
-//       timeForForecast = `1`;
-//       determineFullForecast();
-//     }else if(timeToForecast === "Evening"){
-//       timeForForecast = `3`;
-//       determineFullForecast()
-//     }else if(timeToForecast === "Night"){
-//       timeForForecast = `6`;
-//       determineFullForecast();
-//     };
-//   });
-// };
+console.log(forecastTimes)
+for(let i = 0; i < forecastTimes.length; i++){
+  forecastTimes[i].addEventListener("click", (event)=>{
+    let clickedTime = event.target.innerText;
+    console.log(clickedTime)
+    if(clickedTime === "Morning"){
+      timeForForecast = `5`;
+      determineFullForecast();
+    }else if(clickedTime === "Afternoon"){
+      timeForForecast = `1`;
+      determineFullForecast();
+    }else if(clickedTime === "Evening"){
+      timeForForecast = `3`;
+      determineFullForecast()
+    }else if(clickedTime === "Night"){
+      timeForForecast = `6`;
+      determineFullForecast();
+    };
+  });
+};
+
+
+
 /*TODO:
-
-  Impliment results for our 5-day forecast
-    -potentially add ability to change which forecast for a given block of time is being displayed(morning, afternoon, evening, night)
-    -we would need to add some buttons for this, probably somewhere near the 5-day forecast
-  
-  Ability to search other cities without a page refresh
-    -ability to delete saved cities upon button press, will need to add aditional button element for this
-
-  Re-implimentation of the small weather-graphics that were previously used(cloudy symbol, sunny symbol, clear symbol)
-    -ensure they're being used in the main, current-day, forecast readout
-
-  More user feedback
-    -maybe a prompt/alert if city names are spelled incorrectly
-    -possibly display a button which would allow the user to see the 5-day forecast, rather than an empty/hidden chart
+  Implimentation of user-selection of cities, to ensure they're getting weather for area's they intend
+    -changes have been made to how functions are being called, will have to revert those changes to test certain things
 
   Likely some CSS touch-ups and changes
     -Will have to look at and refamiliarize myself with bootstrap, probably want to continue styling this app with it
