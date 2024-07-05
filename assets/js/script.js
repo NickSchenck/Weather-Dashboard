@@ -1,29 +1,49 @@
-dayjs.extend(window.dayjs_plugin_utc);
-dayjs.extend(window.dayjs_plugin_timezone);
+/*searchSection and forecastTimes are fairly simple variables, with event listeners attached to each of them.*/
 let searchSection = document.getElementById("search-section");
-let fullForecastSection = document.getElementById("five-readout");
 let forecastTimes = document.querySelectorAll(".forecast-times");
-let availableStates = document.querySelectorAll(".available-states");
-let cityDeleteButton = document.getElementById("delete-button");
-let userSelection = document.getElementById("user-selection");
-// let stateConfirmation = document.getElementById("state-confirm");
 
-let time = moment(new Date()).format("MM/DD");
-let timeForForecast = `5`;
-let currentDay = new Date().toLocaleString('en-us', {  weekday: 'long' });
+/*fullForecastSection targets the entire container for our five day forecast, and is used to determine when its visible and which
+bootsrap classes will be attached to it.*/
+let fullForecastSection = document.getElementById("five-readout");
+
+/*userSelection is a variable which targets the area where text and buttons which will be generated for a user to select the state their
+city is in.*/
+let userSelection = document.getElementById("user-selection");
+
+/*historySection is a variable used to target the section where containers holding a previously searched city and a delete button will
+be rendered.*/
 let historySection = document.getElementById("search-history");
+
+/*timeForForecast is a variable initialized to the string-value of 8. It is used to determine which time-values are selected for saving
+ data to five day forecast, based on which time-of-day the user has selected to view in the five day forecast.*/
+let timeForForecast = `8`;
+
+/*baseURL and apiKey are both variables exclusively for interacting with API calls.*/
 let baseURL = "http://api.openweathermap.org/data/2.5/";
 let apiKey = "88492f617957986cb392da3e78550452";
-let searchCity = document.getElementById("search-area");
+
+/*allSearchedCities and globalData are both variables left at base-initialized status. allSearchedCities is an array that will contain
+previously searched cities, and will have entries removed from it if the user clicks a cities delete button. globalData is a generic
+variable which is set to a data-return from an API fetch; this information is saved globally to ensure it is properly read by our
+determineFullForecast function.*/
 let allSearchedCities = [];
 let globalData;
 
+/*formSubmitHandler is a function which submits our users city value. First, we initialize a variable of city to the trimmed(removes
+whitespace from both ends of a value) value of a element with an Id of search-area. We preventDefault of the event of the form being
+submitted(this just prevents a page-refresh, as that is default behavior on form-submission). We then enter an if statement where we
+check if city is equal to an empty string, and if so we trigger an alert on our window object, then return out of the statement/function,
+ensuring the rest of the function doesn't run. Otherwise, we initialize cityCell- which will create a div element, citySave- which will
+create a button element, and deleteButton- which will also create a button element. Then, several classes(which translate to bootstrap)
+are added to the citySave variable, and its innerText property is set to the city variable. The deleteButton variable also has classes
+added to it, and has its innerText property set to the string `Del`. Continued below...*/
 function formSubmitHandler() {
-  let city = searchCity.value.trim();
+  let city = document.getElementById("search-area").value.trim();
   event.preventDefault();
 
   if (city === "") {
     alert("You must enter a valid city.")
+    return;
   };
   let cityCell = document.createElement("div");
   let citySave = document.createElement("button");
@@ -33,40 +53,41 @@ function formSubmitHandler() {
   deleteButton.classList.add("rounded", "delete-button");
   deleteButton.innerText = `Del`;
   
-
+/*...Here, we enter an if statement, where we check if the variable city is included within the array-variable allSearchedCities, and if
+this evaluates to truthy we call an alert on our window object. If city is NOT included in allSearchedCities, we push city to
+allSearchedCities, append the cityCell variable(a div element) onto the historySection variable, and append both the deleteButton and
+citySave variables(both button elements) onto the cityCell variable. Exiting out of the if/else, we call our getUserChoice function with
+the argument of city. Continued below...*/
   if(allSearchedCities.includes(city)){
-    window.alert(`City is saved`);
+    window.alert(`City is already saved.`);
   }else{
     allSearchedCities.push(city);
     historySection.appendChild(cityCell);
     cityCell.appendChild(deleteButton);
     cityCell.appendChild(citySave);
   };
-  getWeather(city);
   getUserChoice(city);
 
+  /*...Here, we add an event listener to our citySave variable, activated on a click and calling an annonymous, event driven function.
+  We define the variable cityToSearch as the innerText property of whatever the target of our event is(what text of what is clicked),
+  and call our getUserChoice function with an argument of cityToSearch passed in. Continued below...*/
   citySave.addEventListener("click", (event)=>{
     let cityToSearch = event.target.innerText;
-    getWeather(cityToSearch);
+    getUserChoice(cityToSearch);
   });
-
+/*...Here, we add an event listener to our deleteButton varaiable, activated on a click and calling an annonymous, event driven function.
+We define the variable parentElement as the parent element of whatever the target of our event is, and use the remove method on our
+parentElement variable(which deletes the div containing the saved city, and its delete button). We also set allSearchedCities equal to
+calling the filter method on allSearchedCities, where we enter an annonymous function that filters through allSearchedCities by the city
+variable. Only the cities which DO NOT(!==) equal the innerText property of the second child(children[1]) of our parentElement variable
+are returned(this ensures that the city deleted by the user is also removed from allSearchedCities array, which would allow the user to
+search the city again, after deleting it)*/
   deleteButton.addEventListener("click", (event)=>{
     let parentElement = event.target.parentElement;
     parentElement.remove();
     allSearchedCities = allSearchedCities.filter((city) => city !== parentElement.children[1].innerText);
   });
 };
-/*http://api.openweathermap.org/geo/1.0/reverse?lat={lat}&lon={lon}&limit={limit}&appid={API key}
-  http://api.openweathermap.org/geo/1.0/direct?q={city name},{state code},{country code}&limit={limit}&appid={API key} 
-  
-  shuffle(array.answers).forEach((answer) => {
-    let button = document.createElement("button");
-    button.innerText = answer.option;
-    answerButtons.appendChild(button);
-    button.classList.add("btn", "disableBtn");
-    button.addEventListener("click", answerSelected);
-    button.addEventListener("click", isCorrect);
-  });*/
 
 function getUserChoice(city){
   userSelection.classList.remove("hide");
@@ -76,8 +97,13 @@ function getUserChoice(city){
       return response.json();
     })
     .then(function(data){
-      userSelection.innerText = `Which state is ${city} located in?`
-      console.log(data);
+      console.log(data)
+      data = data.filter((value, index, self) =>
+        index === self.findIndex((i) => (
+          i.state === value.state
+      )));
+      userSelection.innerText = `Which state is ${city} located in?`;
+      
       data.forEach((entry) =>{
         let button = document.createElement("button");
         button.classList.add("available-states");
@@ -85,31 +111,25 @@ function getUserChoice(city){
         
         userSelection.appendChild(button);
       });
-      /*Need to determine the city the user selects, THEN ensure that only the information related to that selection is passed to a
-      function that makes an API call w/ lat&lon of the selected city*/
-      
+
+      for(let i = 0; i < userSelection.children.length; i++){
+        userSelection.addEventListener("click", (event)=>{
+        let chosenState = event.target.innerText;
+
+        if(chosenState === data[i].state){
+          getWeather(city, chosenState);
+        };
+        });
+      };
     });
 };
 
-console.log(availableStates)
-for(let i = 0; i < availableStates.length; i++){
-  availableStates[i].addEventListener("click", (event)=>{
-    let chosenState = event.target.innerText;
-    console.log(chosenState);
-  })
-}
-/*data.forEach((entry) =>{
-        let button = document.createElement("button");
-        button.classList.add("available-states");
-        button.innerText = entry.state;
-        
-        userSelection.appendChild(button);
-      }); */
+function getWeather(city, state){
+  let time = moment(new Date()).format("MM/DD");
+  let currentDay = new Date().toLocaleString('en-us', {  weekday: 'long' });
+  document.getElementById("city-searched").innerText = `${city}, ${state}, ${currentDay}, ${time}`;
 
-function getWeather(city){
-  document.getElementById("city-searched").innerText = `${city}, ${currentDay}, ${time}`;
-
-  fetch(`${baseURL}weather?appid=${apiKey}&q=${city}&units=imperial`)
+  fetch(`${baseURL}weather?appid=${apiKey}&q=${state}&units=imperial`)
     .then(function (response) {
       return response.json();
     })
@@ -118,29 +138,18 @@ function getWeather(city){
       getFullForecast(data);
     });
 };
-/*function getWeather(city){
-  document.getElementById("city-searched").innerText = `${city}, ${currentDay}, ${time}`;
-
-  fetch(`${baseURL}weather?appid=${apiKey}&q=${city}&units=imperial`)
-    .then(function (response) {
-      return response.json();
-    })
-    .then(function (data) {
-      displayWeather(data);
-      getFullForecast(data);
-    });
-}; */
 
 function getFullForecast(weather){
   let lat = weather.coord.lat;
   let lon = weather.coord.lon;
-/*https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={API key} */
+
   fetch(`${baseURL}forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&units=imperial`)
     .then(function(response){
       return response.json();
     })
     .then(function(data){
       globalData = data;
+      console.log(globalData)
       determineFullForecast();
     });
 };
@@ -182,34 +191,29 @@ function displayWeather(weather) {
 
 searchSection.addEventListener("submit", formSubmitHandler);
 
-console.log(forecastTimes)
 for(let i = 0; i < forecastTimes.length; i++){
   forecastTimes[i].addEventListener("click", (event)=>{
     let clickedTime = event.target.innerText;
-    console.log(clickedTime)
+
     if(clickedTime === "Morning"){
-      timeForForecast = `5`;
+      timeForForecast = `2`;
       determineFullForecast();
     }else if(clickedTime === "Afternoon"){
-      timeForForecast = `1`;
+      timeForForecast = `8`;
       determineFullForecast();
     }else if(clickedTime === "Evening"){
-      timeForForecast = `3`;
+      timeForForecast = `0`;
       determineFullForecast()
     }else if(clickedTime === "Night"){
-      timeForForecast = `6`;
+      timeForForecast = `3`;
       determineFullForecast();
     };
   });
 };
 
-
-
 /*TODO:
-  Implimentation of user-selection of cities, to ensure they're getting weather for area's they intend
-    -changes have been made to how functions are being called, will have to revert those changes to test certain things
-
   Likely some CSS touch-ups and changes
     -Will have to look at and refamiliarize myself with bootstrap, probably want to continue styling this app with it
     -considering combining the date and icon rows in 5-day forecast 
+    -need to consider how the mobile versions of the app may render/look
  */
