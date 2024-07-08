@@ -51,7 +51,7 @@ function formSubmitHandler() {
   citySave.classList.add("d-flex", "justify-content-center", "align-items-stretch", "w-75", "text-center", "mt-2", "rounded");
   citySave.innerText = city;
   deleteButton.classList.add("rounded", "delete-button");
-  deleteButton.innerText = `Del`;
+  deleteButton.innerText = "Del";
   
 /*...Here, we enter an if statement, where we check if the variable city is included within the array-variable allSearchedCities, and if
 this evaluates to truthy we call an alert on our window object. If city is NOT included in allSearchedCities, we push city to
@@ -89,6 +89,13 @@ search the city again, after deleting it)*/
   });
 };
 
+/*getUserChoice is a function which alters the API call, depending on which state the user wanted weather from. We first remove a class
+of hide from our userSelection variable, making the element visible. We then enter into a fetch call, which is invoked with a URL string-
+containing template literals- to request data from a particular source. We append the .then method onto our fetch call, using an
+anonymous function to return our response object as json data, and append a second .then method which also invokes a anonymous function
+to manipulate our data object. Here, we set data equal to calling a filter method on itself- which will ensure there are no duplicate
+entries within the array that data contains. Then, we set the innerText property of our userSelection variable to a string containing a
+template literal. Continued below...*/
 function getUserChoice(city){
   userSelection.classList.remove("hide");
 
@@ -97,13 +104,16 @@ function getUserChoice(city){
       return response.json();
     })
     .then(function(data){
-      console.log(data)
       data = data.filter((value, index, self) =>
         index === self.findIndex((i) => (
           i.state === value.state
       )));
       userSelection.innerText = `Which state is ${city} located in?`;
       
+      /*...Here, we call the forEach method on our data object. For each entry within data, we create a button element with our button
+      variable, add a class of available-states to our button variable, set the innerText property of button to entry.state, and use
+      the appendChild method to append our button variable onto our userSelection variable(This creates all the states from which the
+      user can choose to indentify their city with). Continued below...*/
       data.forEach((entry) =>{
         let button = document.createElement("button");
         button.classList.add("available-states");
@@ -112,18 +122,31 @@ function getUserChoice(city){
         userSelection.appendChild(button);
       });
 
+      /*...Here, we enter a for loop. We initialize the variable i as zero, test if i is LESS THAN the length property of all children of
+      userSelection, and iterate i if it is less than that number. Within the for loop, we add an event listener onto userSelection, where
+      a click will activate an anonymous, event-driven function. We initialize the variable chosenState as the innerText property of the
+      target of our event(text of what city was clicked), then enter an if statement. In the if statement, we check to see if our
+      chosenState variable is equal to the state property of data at an index, and if so we call the getWeather function with the arguments
+      of city and chosenState.*/
       for(let i = 0; i < userSelection.children.length; i++){
         userSelection.addEventListener("click", (event)=>{
         let chosenState = event.target.innerText;
 
-        if(chosenState === data[i].state){
-          getWeather(city, chosenState);
-        };
+          if(chosenState === data[i].state){
+            getWeather(city, chosenState);
+          };
         });
       };
     });
 };
 
+/*getWeather is a function which uses its parameters to make another API call for more information. First, we initialize the variables
+time and currentDay, which use the Date class to give us dates/time that are easily understood. We then select an element with the id of
+city-searched and change its innerText property to a string comprised of four template literals; city, state, currentDay, and time(This
+gives us our time readout on the todays forecast card). We invoke another fetch call to the API, still with a URL string containing
+template literals, append a .then method to use an anonymous function for returning our response object in json format, and append a
+final .then method, which uses an anonymous function to pass our data object as an argument to the function calls of displayWeather and
+getFullForecast.*/
 function getWeather(city, state){
   let time = moment(new Date()).format("MM/DD");
   let currentDay = new Date().toLocaleString('en-us', {  weekday: 'long' });
@@ -139,6 +162,12 @@ function getWeather(city, state){
     });
 };
 
+/*getFullForecast is a function which uses its parameter to make another API call, specifically for our 5-day forecast's information.
+First, we initialize the variables lat and lon as the lat and lon properties on the coord property of our weather object. We then invoke
+another fetch call to the API, with a URL string containing template literals- including the lat and lon variables, so the search can
+specifically target an areas weather. We append a .then method to use an anonymous function for returning our response object in json
+format, and append an additional .then method, which first sets the globalData variable equal to our data object, then calls our
+determineFullForecast function.*/
 function getFullForecast(weather){
   let lat = weather.coord.lat;
   let lon = weather.coord.lon;
@@ -149,11 +178,18 @@ function getFullForecast(weather){
     })
     .then(function(data){
       globalData = data;
-      console.log(globalData)
       determineFullForecast();
     });
 };
 
+/*determineFullForecast is a function which selects a set of data within globalData- via a time, and packages the data entries which match
+that time into an array for displaying that data. We first initialize the variable fiveDayForecast as an empty array. Then, we enter a
+for loop, where we initialize the variable i as zero, check if i is LESS THAN the length of the list property of globalData, and iterate
+i if so. In the for loop, we enter an if statement, where we check to see if the dt_txt value at an index of 12, within the list property
+at an index, in our globalData object is equal to the variable timeForForecast(This is evaluating if a character matches another
+character, in this case a specific digit in a time). If these values are matching, we use the .push method to save list at an index-
+within our globalData variable, to the fiveDayForecast array-variable. Outside of the if statement and for loop, we then call the
+displayFullForecast function with an argument of the fiveDayForecast variable.*/
 function determineFullForecast(){
   let fiveDayForecast = [];
 
@@ -165,6 +201,15 @@ function determineFullForecast(){
   displayFullForecast(fiveDayForecast);
 };
 
+/*displayFullForecast is a function which uses the parameter passed to it to display the 5-day forecast relavent to the users search,
+even as the user alters or searches a new city. We start by removing a class of hide and adding bootstrap classes to our
+fullForecastSection variable. Then we enter a for loop, initializing the variable i as 0, checking if i is LESS THAN 5, and iterating i
+if so. We initialize dateConversion as a Date class-instance of the dt property multiplied by 1000- within the weather object at an
+index(This is one method of converting a computer-timestamp into human-readable date/time formats). Then, initialize the variable day as
+calling the .slice method on dateConversion after its been evaluated into a string by the .toDateString method(giving us the day). We
+initialize the variable date as calling the .slice method on the dt_txt property, within our weather object at an index(this gives us
+the MM - DD format). Then, we initialize a final variable of icon, set to the icon property within the weather property at its first
+index, within the weather object at an index. Continued below...*/
 function displayFullForecast(weather){
   fullForecastSection.classList.remove("hide");
   fullForecastSection.classList.add("d-flex", "flex-wrap");
@@ -173,6 +218,11 @@ function displayFullForecast(weather){
     let day = dateConversion.toDateString().slice(0, 3);
     let date = weather[i].dt_txt.slice(5, 11);
     let icon = weather[i].weather[0].icon;
+    /*...Here, we select a few elements by their Id of NAME : (i + 1). This is done to change which elements are being targeted, as the
+    app sifts through the data it has collected, and decides where that data will be displayed. We mostly target the innerText property
+    of the various elements with strings containing template literals, but we do specifically target the src property when selecting Id
+    by icon- still with a string containing template literals(this is because these elements are img elements, and this will display
+    our weather icon within the 5-day forecast).*/
     document.getElementById("date" + (i + 1)).innerHTML = `${day}, ${date}`;
     document.getElementById("icon" + (i + 1)).src = `http://openweathermap.org/img/w/${icon}.png`;
     document.getElementById("temp" + (i + 1)).innerText = `Temp: ${weather[i].main.temp}°F`;
@@ -181,16 +231,29 @@ function displayFullForecast(weather){
   };
 };
 
+/*displayWeather is a function which displays the daily weather within the main daily weather card. We first initialize the variable icon
+as the icon property within the weather property at its first index, within the weather object. We then select a few elements by the Ids
+of main-icon, city-temp, city-wind, and city-humid. In most of these we target the innerText property and set it to a string containing
+template literals, but we do target the src property for main-icon, then set it to a string containing a template literal.*/
 function displayWeather(weather) {
   let icon = weather.weather[0].icon;
   document.getElementById("main-icon").src = `http://openweathermap.org/img/w/${icon}.png`;
-  document.getElementById("city-temp").innerText = "Temp: " + weather.main.temp + "°F";
-  document.getElementById("city-wind").innerText = "Wind: " + weather.wind.speed + "MPH";
-  document.getElementById("city-humid").innerText = "Humidity: " + weather.main.humidity + "%";
+  document.getElementById("city-temp").innerText = `Temp: ${weather.main.temp}°F`;
+  document.getElementById("city-wind").innerText = `Wind: ${weather.wind.speed}MPH`;
+  document.getElementById("city-humid").innerText = `Humidity: ${weather.main.humidity}%`;
 };
 
+/*Here, we attach an event listener to the searchSection variable, have it listen for a submit event, and upon this event triggering we
+call the formSubmitHandler function. This is essentially the driver for our app.*/
 searchSection.addEventListener("submit", formSubmitHandler);
 
+/*While it might not initially look like it, this is a event listener. First, we enter a for loop, where we initialize the variable i as
+0, test if i is LESS THAN the length property of forecastTimes, and iterate i if so. Then, we attach an event listener to forecastTimes
+at an index, and upon a click we activate an event-driven anonymous function. Within this function, we initialize the variable
+clickedTime as the innerText property of the target of our click-event. Entering a chain of if and else/if statements, we check to see if
+clickedTime is equal to strings that evaluate to a time-of-day. If it is equal to these strings, we set the variable timeForForecast to
+a string which evaluates to a number, then we call the determineFullForecast function(this is what allows the user to change the time of
+day being displayed in their 5-day forecast).*/
 for(let i = 0; i < forecastTimes.length; i++){
   forecastTimes[i].addEventListener("click", (event)=>{
     let clickedTime = event.target.innerText;
