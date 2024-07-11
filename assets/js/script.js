@@ -3,8 +3,9 @@ let searchSection = document.getElementById("search-section");
 let forecastTimes = document.querySelectorAll(".forecast-times");
 
 /*fullForecastSection targets the entire container for our five day forecast, and is used to determine when its visible and which
-bootsrap classes will be attached to it.*/
+bootsrap classes will be attached to it. mainCityDisplay targets the main weather-card, and is used to determine when its visible.*/
 let fullForecastSection = document.getElementById("five-readout");
+let mainCityDisplay = document.getElementById("city-readout");
 
 /*userSelection is a variable which targets the area where text and buttons which will be generated for a user to select the state their
 city is in.*/
@@ -38,7 +39,7 @@ create a button element, and deleteButton- which will also create a button eleme
 are added to the citySave variable, and its innerText property is set to the city variable. The deleteButton variable also has classes
 added to it, and has its innerText property set to the string `Del`. Continued below...*/
 function formSubmitHandler() {
-  let city = document.getElementById("search-area").value.trim();
+  let city = document.getElementById("search-area").value.trim();//Could set delete button icon in this function to an actual icon
   event.preventDefault();
 
   if (city === "") {
@@ -47,19 +48,35 @@ function formSubmitHandler() {
   };
   let cityCell = document.createElement("div");
   let citySave = document.createElement("button");
+  let svg = document.createElement("svg");
+  let path1 = document.createElement("path");
+  let path2 =document.createElement("path");
   let deleteButton = document.createElement("button");
   citySave.classList.add("d-flex", "justify-content-center", "align-items-stretch", "w-75", "text-center", "mt-2", "rounded");
   citySave.innerText = city;
   deleteButton.classList.add("rounded", "delete-button");
-  deleteButton.innerText = "Del";
-  
+  svg.xmlns = "http://www.w3.org/2000/svg";
+  svg.width = "16"
+  svg.height = "16"
+  svg.fill = "currentColor"
+  svg.classList.add("bi", "bi-trash")
+  svg.viewBox = "0 0 16 16"
+  deleteButton.appendChild(svg);
+  path1.d = "M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"
+  path2.d = "M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"
+  svg.append(path1, path2);
+  // deleteButton.innerText = "Del";
+  /*<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+  <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+  <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
+</svg> */
 /*...Here, we enter an if statement, where we check if the variable city is included within the array-variable allSearchedCities, and if
 this evaluates to truthy we call an alert on our window object. If city is NOT included in allSearchedCities, we push city to
 allSearchedCities, append the cityCell variable(a div element) onto the historySection variable, and append both the deleteButton and
 citySave variables(both button elements) onto the cityCell variable. Exiting out of the if/else, we call our getUserChoice function with
 the argument of city. Continued below...*/
   if(allSearchedCities.includes(city)){
-    window.alert(`City is already saved.`);
+    window.alert(`City has already been searched, and is saved.`);
   }else{
     allSearchedCities.push(city);
     historySection.appendChild(cityCell);
@@ -69,7 +86,7 @@ the argument of city. Continued below...*/
   getUserChoice(city);
 
   /*...Here, we add an event listener to our citySave variable, activated on a click and calling an annonymous, event driven function.
-  We define the variable cityToSearch as the innerText property of whatever the target of our event is(what text of what is clicked),
+  We define the variable cityToSearch as the innerText property of whatever the target of our event is(the text of what is clicked),
   and call our getUserChoice function with an argument of cityToSearch passed in. Continued below...*/
   citySave.addEventListener("click", (event)=>{
     let cityToSearch = event.target.innerText;
@@ -89,14 +106,16 @@ search the city again, after deleting it)*/
   });
 };
 
-/*getUserChoice is a function which alters the API call, depending on which state the user wanted weather from. We first remove a class
-of hide from our userSelection variable, making the element visible. We then enter into a fetch call, which is invoked with a URL string-
-containing template literals- to request data from a particular source. We append the .then method onto our fetch call, using an
-anonymous function to return our response object as json data, and append a second .then method which also invokes a anonymous function
-to manipulate our data object. Here, we set data equal to calling a filter method on itself- which will ensure there are no duplicate
-entries within the array that data contains. Then, we set the innerText property of our userSelection variable to a string containing a
-template literal. Continued below...*/
+/*getUserChoice is a function which alters the API call, depending on which state the user wanted weather from. We first initialize div
+as a variable which creates a div element, and remove a class of hide from our userSelection variable, making the element visible. We
+then enter into a fetch call, which is invoked with a URL string- containing template literals- to request data from a particular source.
+We append the .then method onto our fetch call, using an anonymous function to return our response object as json data, and append a
+second .then method which also invokes a anonymous function to manipulate our data object. Here, we set data equal to calling a filter
+method on itself- which will ensure there are no duplicate entries within the array that data contains. Then, we set the innerText
+property of our userSelection variable to a string containing a template literal and append a div onto our userSelection variable.
+Continued below...*/
 function getUserChoice(city){
+  let div = document.createElement("div");
   userSelection.classList.remove("hide");
 
   fetch(`http://api.openweathermap.org/geo/1.0/direct?q=${city}&limit=5&appid=${apiKey}`)
@@ -109,26 +128,26 @@ function getUserChoice(city){
           i.state === value.state
       )));
       userSelection.innerText = `Which state is ${city} located in?`;
-      
+      userSelection.appendChild(div);
       /*...Here, we call the forEach method on our data object. For each entry within data, we create a button element with our button
       variable, add a class of available-states to our button variable, set the innerText property of button to entry.state, and use
-      the appendChild method to append our button variable onto our userSelection variable(This creates all the states from which the
+      the appendChild method to append our button variable onto our div variable(This creates all the states from which the
       user can choose to indentify their city with). Continued below...*/
       data.forEach((entry) =>{
         let button = document.createElement("button");
         button.classList.add("available-states");
         button.innerText = entry.state;
         
-        userSelection.appendChild(button);
+        div.appendChild(button);
       });
 
       /*...Here, we enter a for loop. We initialize the variable i as zero, test if i is LESS THAN the length property of all children of
-      userSelection, and iterate i if it is less than that number. Within the for loop, we add an event listener onto userSelection, where
-      a click will activate an anonymous, event-driven function. We initialize the variable chosenState as the innerText property of the
-      target of our event(text of what city was clicked), then enter an if statement. In the if statement, we check to see if our
-      chosenState variable is equal to the state property of data at an index, and if so we call the getWeather function with the arguments
-      of city and chosenState.*/
-      for(let i = 0; i < userSelection.children.length; i++){
+      our div variable(how many children the div has), and iterate i if it is less than that number. Within the for loop, we add an event
+      listener onto userSelection, where a click will activate an anonymous, event-driven function. We initialize the variable
+      chosenState as the innerText property of the target of our event(text of what city was clicked), then enter an if statement. In
+      the if statement, we check to see if our chosenState variable is equal to the state property of data at an index, and if so we call
+      the getWeather function with the arguments of city and chosenState.*/
+      for(let i = 0; i < div.children.length; i++){
         userSelection.addEventListener("click", (event)=>{
         let chosenState = event.target.innerText;
 
@@ -143,7 +162,7 @@ function getUserChoice(city){
 /*getWeather is a function which uses its parameters to make another API call for more information. First, we initialize the variables
 time and currentDay, which use the Date class to give us dates/time that are easily understood. We then select an element with the id of
 city-searched and change its innerText property to a string comprised of four template literals; city, state, currentDay, and time(This
-gives us our time readout on the todays forecast card). We invoke another fetch call to the API, still with a URL string containing
+gives us our time readout on the main forecast card). We invoke another fetch call to the API, still with a URL string containing
 template literals, append a .then method to use an anonymous function for returning our response object in json format, and append a
 final .then method, which uses an anonymous function to pass our data object as an argument to the function calls of displayWeather and
 getFullForecast.*/
@@ -223,6 +242,7 @@ function displayFullForecast(weather){
     of the various elements with strings containing template literals, but we do specifically target the src property when selecting Id
     by icon- still with a string containing template literals(this is because these elements are img elements, and this will display
     our weather icon within the 5-day forecast).*/
+    document.getElementById("card-" + (i + 1)).style.backgroundColor = 'azure';
     document.getElementById("date" + (i + 1)).innerHTML = `${day}, ${date}`;
     document.getElementById("icon" + (i + 1)).src = `http://openweathermap.org/img/w/${icon}.png`;
     document.getElementById("temp" + (i + 1)).innerText = `Temp: ${weather[i].main.temp}°F`;
@@ -231,21 +251,20 @@ function displayFullForecast(weather){
   };
 };
 
-/*displayWeather is a function which displays the daily weather within the main daily weather card. We first initialize the variable icon
+/*displayWeather is a function which displays the daily weather within the main daily weather card. We first remove a class of hide from
+our mainCityDisplay variable and set the display property of its style property to inline-block. Then we initialize the variable icon
 as the icon property within the weather property at its first index, within the weather object. We then select a few elements by the Ids
 of main-icon, city-temp, city-wind, and city-humid. In most of these we target the innerText property and set it to a string containing
 template literals, but we do target the src property for main-icon, then set it to a string containing a template literal.*/
 function displayWeather(weather) {
+  mainCityDisplay.classList.remove("hide");
+  mainCityDisplay.style.display = "inline-block";
   let icon = weather.weather[0].icon;
   document.getElementById("main-icon").src = `http://openweathermap.org/img/w/${icon}.png`;
   document.getElementById("city-temp").innerText = `Temp: ${weather.main.temp}°F`;
   document.getElementById("city-wind").innerText = `Wind: ${weather.wind.speed}MPH`;
   document.getElementById("city-humid").innerText = `Humidity: ${weather.main.humidity}%`;
 };
-
-/*Here, we attach an event listener to the searchSection variable, have it listen for a submit event, and upon this event triggering we
-call the formSubmitHandler function. This is essentially the driver for our app.*/
-searchSection.addEventListener("submit", formSubmitHandler);
 
 /*While it might not initially look like it, this is a event listener. First, we enter a for loop, where we initialize the variable i as
 0, test if i is LESS THAN the length property of forecastTimes, and iterate i if so. Then, we attach an event listener to forecastTimes
@@ -274,9 +293,6 @@ for(let i = 0; i < forecastTimes.length; i++){
   });
 };
 
-/*TODO:
-  Likely some CSS touch-ups and changes
-    -Will have to look at and refamiliarize myself with bootstrap, probably want to continue styling this app with it
-    -considering combining the date and icon rows in 5-day forecast 
-    -need to consider how the mobile versions of the app may render/look
- */
+/*Here, we attach an event listener to the searchSection variable, have it listen for a submit event, and upon this event triggering we
+call the formSubmitHandler function. This is essentially the driver for our app.*/
+searchSection.addEventListener("submit", formSubmitHandler);

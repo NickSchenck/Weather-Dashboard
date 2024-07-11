@@ -1,14 +1,25 @@
+body{
+    background-image: url("../images/pexels-brett-sayles-1431822.jpg");
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
 header h1 {
     text-align: center;
-    background-color:cornflowerblue;
+    background-color:rgb(161, 182, 221);
 }
 
 button{
-    background-color: cornflowerblue;
+    background-color:rgb(161, 182, 221);
 }
 
 button:hover {
-    background-color: rgb(165, 187, 229);
+    background-color: rgb(188, 201, 226);
+}
+
+img{
+    height: 150px;
+    width: 160px;
 }
 
 .hide{
@@ -26,8 +37,18 @@ button:hover {
     border-radius: .25rem;
 }
 
+.card {
+
+    background-color: rgba(0, 0, 0, 0.2);
+
+}
+
 #search-container{
     display: inline-block;
+}
+
+#search-container h2{
+    color: azure;
 }
 
 #search-section {
@@ -53,11 +74,21 @@ button:hover {
     border-radius: .25rem;
 }
 
+#user-selection{
+    margin-left: 10px;
+    font-size: 1.2rem;
+}
+
 #city-readout{
-    display: inline-block;
-    margin: 0 0 0 45px;
+    margin: 10px 0 5px 45px;
     border: solid 1px black;
     width: 560px;
+    position: absolute;
+    background-color: white;
+}
+
+#city-readout h3, #city-readout img, #city-readout p{
+    margin-left: 5px;
 }
 
 #five-day-header{
@@ -68,8 +99,98 @@ button:hover {
     border-radius: .25rem;
 }
 
+#five-readout{
+    margin: 0 0 10px 10px;
+}
+
 #main-icon{
     float: right;
-    height: 120px;
     margin: 0 30px 5px 0;
+}
+
+@media only screen and (max-width: 891px){
+    #city-readout{
+        width: 50%;
+    }
+}
+
+@media only screen and (max-width: 858px){
+    #five-readout{
+        width: 75%;
+        justify-content: center;
+    }
+}
+
+@media only screen and (max-width: 669px){
+    #user-selection{
+        width: 50%;
+    }
+
+    #city-readout{
+        width: 42%;
+    }
+
+    #main-icon{
+        height: 120px;
+        width: 120px;
+    }
+}
+
+@media only screen and (max-width: 633px){
+    #main-icon{
+        height: 120px;
+        width: 120px;
+    }
+
+    #five-readout{
+        padding-top: 25px;
+    }
+}
+
+@media only screen and (max-width: 570px){
+    #five-day-header{
+        margin-top: 40px;
+    }
+
+    #city-readout{
+        width: 30%;
+    }
+}
+
+@media only screen and (max-width: 471px){
+    #main-icon{
+        display: none;
+    }
+
+    #city-searched{
+        font-size: 1.25rem;
+    }
+
+    #city-readout{
+        width: 25%;
+        margin-left: 1.25rem;
+    }
+
+    #five-day-header{
+        margin-top: 0px;
+    }
+
+    #user-selection{
+        margin-top: .75rem;
+    }
+}
+
+@media only screen and (max-width: 471px){
+    #five-day-header{
+        display: block;
+        margin-bottom: .5rem;
+    }
+
+    #five-readout{
+        width: auto;
+    }
+
+    .card{
+        margin-left: .1rem !important;
+    }
 }
