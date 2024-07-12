@@ -98,11 +98,21 @@ parentElement variable(which deletes the div containing the saved city, and its 
 calling the filter method on allSearchedCities, where we enter an annonymous function that filters through allSearchedCities by the city
 variable. Only the cities which DO NOT(!==) equal the innerText property of the second child(children[1]) of our parentElement variable
 are returned(this ensures that the city deleted by the user is also removed from allSearchedCities array, which would allow the user to
-search the city again, after deleting it)*/
+search the city again, after deleting it. More specifically, it targets the button with a city-name, since that will be the second child
+element)*/
   deleteButton.addEventListener("click", (event)=>{
-    let parentElement = event.target.parentElement;
-    parentElement.remove();
+    let parentElement;
+
+    if(event.target.children.length === 1){ 
+      parentElement = event.target.parentElement;
+      parentElement.remove();
+    }else{//I think this is working as I want now; deleting the containing div whether button or svg is clicked
+      parentElement = event.target.parentElement.parentElement;
+      parentElement.remove();
+    }
+    console.log(parentElement.children[1].innerText, allSearchedCities)
     allSearchedCities = allSearchedCities.filter((city) => city !== parentElement.children[1].innerText);
+    console.log(allSearchedCities)
   });
 };
 
