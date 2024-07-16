@@ -24,7 +24,7 @@ let baseURL = "http://api.openweathermap.org/data/2.5/";
 let apiKey = "88492f617957986cb392da3e78550452";
 
 /*allSearchedCities and globalData are both variables left at base-initialized status. allSearchedCities is an array that will contain
-previously searched cities, and will have entries removed from it if the user clicks a cities delete button. globalData is a generic
+previously searched cities, and will have entries removed from it if the user clicks a city's delete button. globalData is a generic
 variable which is set to a data-return from an API fetch; this information is saved globally to ensure it is properly read by our
 determineFullForecast function.*/
 let allSearchedCities = [];
@@ -35,11 +35,13 @@ whitespace from both ends of a value) value of a element with an Id of search-ar
 submitted(this just prevents a page-refresh, as that is default behavior on form-submission). We then enter an if statement where we
 check if city is equal to an empty string, and if so we trigger an alert on our window object, then return out of the statement/function,
 ensuring the rest of the function doesn't run. Otherwise, we initialize cityCell- which will create a div element, citySave- which will
-create a button element, and deleteButton- which will also create a button element. Then, several classes(which translate to bootstrap)
-are added to the citySave variable, and its innerText property is set to the city variable. The deleteButton variable also has classes
-added to it, and has its innerText property set to the string `Del`. Continued below...*/
+create a button element, svg(path1 and path2 as well)- which creates a specialized container for an image, and deleteButton- which will
+also create a button element. Then, several classes(which translate to bootstrap) are added to the citySave variable, and its innerText
+property is set to the city variable. The deleteButton variable also has classes added to it, we affect/alter/add many properties and
+classes to our svg variable, append svg to the deleteButton variable, affect the d class of path1 and path2, then append path1 and path2
+to the svg variable. Continued below...*/
 function formSubmitHandler() {
-  let city = document.getElementById("search-area").value.trim();//Could set delete button icon in this function to an actual icon
+  let city = document.getElementById("search-area").value.trim();
   event.preventDefault();
 
   if (city === "") {
@@ -65,11 +67,6 @@ function formSubmitHandler() {
   path1.d = "M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"
   path2.d = "M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"
   svg.append(path1, path2);
-  // deleteButton.innerText = "Del";
-  /*<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
-  <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
-  <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
-</svg> */
 /*...Here, we enter an if statement, where we check if the variable city is included within the array-variable allSearchedCities, and if
 this evaluates to truthy we call an alert on our window object. If city is NOT included in allSearchedCities, we push city to
 allSearchedCities, append the cityCell variable(a div element) onto the historySection variable, and append both the deleteButton and
@@ -93,30 +90,32 @@ the argument of city. Continued below...*/
     getUserChoice(cityToSearch);
   });
 /*...Here, we add an event listener to our deleteButton varaiable, activated on a click and calling an annonymous, event driven function.
-We define the variable parentElement as the parent element of whatever the target of our event is, and use the remove method on our
-parentElement variable(which deletes the div containing the saved city, and its delete button). We also set allSearchedCities equal to
-calling the filter method on allSearchedCities, where we enter an annonymous function that filters through allSearchedCities by the city
-variable. Only the cities which DO NOT(!==) equal the innerText property of the second child(children[1]) of our parentElement variable
-are returned(this ensures that the city deleted by the user is also removed from allSearchedCities array, which would allow the user to
-search the city again, after deleting it. More specifically, it targets the button with a city-name, since that will be the second child
-element)*/
+We initialize the variable parentElement, then enter into an if statment that tests if the length property of the children property of
+our event is equal to 1(does the clicked element have more than 1 children or not). If so, we set parentElement variable equal to the
+parentElement property of our event(the container of what was clicked), and call .remove on parentElement. If the length property of the
+children property of our event IS NOT equal to 1, we set parentElement equal to the parentElement property of the parentElement property
+of our event(this targets the container 2 levels up; the containers container), and call .remove on parentElement(this ensures that if
+the garbage svg icon is clicked, rather than the button containing it, we still target the div holding the city button AND associated
+delete button for deletion). We also set allSearchedCities equal to calling the filter method on allSearchedCities, where we enter an
+annonymous function that filters through allSearchedCities by the city variable. Only the cities which DO NOT(!==) equal the innerText
+property of the second child(children[1]) of our parentElement variable are returned(this ensures that the city deleted by the user is
+also removed from allSearchedCities array, which would allow the user to search the city again, after deleting it. More specifically,
+it targets the button with a city-name, since that will be the second child element)*/
   deleteButton.addEventListener("click", (event)=>{
     let parentElement;
 
     if(event.target.children.length === 1){ 
       parentElement = event.target.parentElement;
       parentElement.remove();
-    }else{//I think this is working as I want now; deleting the containing div whether button or svg is clicked
+    }else{
       parentElement = event.target.parentElement.parentElement;
       parentElement.remove();
     }
-    console.log(parentElement.children[1].innerText, allSearchedCities)
     allSearchedCities = allSearchedCities.filter((city) => city !== parentElement.children[1].innerText);
-    console.log(allSearchedCities)
   });
 };
 
-/*getUserChoice is a function which alters the API call, depending on which state the user wanted weather from. We first initialize div
+/*getUserChoice is a function which makes an API call, depending on which state the user wanted weather from. We first initialize div
 as a variable which creates a div element, and remove a class of hide from our userSelection variable, making the element visible. We
 then enter into a fetch call, which is invoked with a URL string- containing template literals- to request data from a particular source.
 We append the .then method onto our fetch call, using an anonymous function to return our response object as json data, and append a
@@ -172,10 +171,10 @@ function getUserChoice(city){
 /*getWeather is a function which uses its parameters to make another API call for more information. First, we initialize the variables
 time and currentDay, which use the Date class to give us dates/time that are easily understood. We then select an element with the id of
 city-searched and change its innerText property to a string comprised of four template literals; city, state, currentDay, and time(This
-gives us our time readout on the main forecast card). We invoke another fetch call to the API, still with a URL string containing
-template literals, append a .then method to use an anonymous function for returning our response object in json format, and append a
-final .then method, which uses an anonymous function to pass our data object as an argument to the function calls of displayWeather and
-getFullForecast.*/
+gives us our location/time readout on the main forecast card). We invoke another fetch call to the API, still with a URL string
+containing template literals, append a .then method to use an anonymous function for returning our response object in json format, and
+append a final .then method, which uses an anonymous function to pass our data object as an argument to the function calls of
+displayWeather and getFullForecast.*/
 function getWeather(city, state){
   let time = moment(new Date()).format("MM/DD");
   let currentDay = new Date().toLocaleString('en-us', {  weekday: 'long' });
@@ -211,14 +210,14 @@ function getFullForecast(weather){
     });
 };
 
-/*determineFullForecast is a function which selects a set of data within globalData- via a time, and packages the data entries which match
-that time into an array for displaying that data. We first initialize the variable fiveDayForecast as an empty array. Then, we enter a
-for loop, where we initialize the variable i as zero, check if i is LESS THAN the length of the list property of globalData, and iterate
-i if so. In the for loop, we enter an if statement, where we check to see if the dt_txt value at an index of 12, within the list property
-at an index, in our globalData object is equal to the variable timeForForecast(This is evaluating if a character matches another
-character, in this case a specific digit in a time). If these values are matching, we use the .push method to save list at an index-
-within our globalData variable, to the fiveDayForecast array-variable. Outside of the if statement and for loop, we then call the
-displayFullForecast function with an argument of the fiveDayForecast variable.*/
+/*determineFullForecast is a function which selects a set of data within globalData- via a time, and packages the data entries which
+match that time into an array for displaying that data. We first initialize the variable fiveDayForecast as an empty array. Then, we
+enter a for loop, where we initialize the variable i as zero, check if i is LESS THAN the length of the list property of globalData,
+and iterate i if so. In the for loop, we enter an if statement, where we check to see if the dt_txt value at an index of 12, within the
+list property at an index, in our globalData object is equal to the variable timeForForecast(This is evaluating if a character matches
+another character, in this case a specific digit in a time). If these values are matching, we use the .push method to save list at an
+index- within our globalData variable, to the fiveDayForecast array-variable. Outside of the if statement and for loop, we then call
+the displayFullForecast function with an argument of the fiveDayForecast variable.*/
 function determineFullForecast(){
   let fiveDayForecast = [];
 
@@ -276,13 +275,13 @@ function displayWeather(weather) {
   document.getElementById("city-humid").innerText = `Humidity: ${weather.main.humidity}%`;
 };
 
-/*While it might not initially look like it, this is a event listener. First, we enter a for loop, where we initialize the variable i as
-0, test if i is LESS THAN the length property of forecastTimes, and iterate i if so. Then, we attach an event listener to forecastTimes
-at an index, and upon a click we activate an event-driven anonymous function. Within this function, we initialize the variable
-clickedTime as the innerText property of the target of our click-event. Entering a chain of if and else/if statements, we check to see if
-clickedTime is equal to strings that evaluate to a time-of-day. If it is equal to these strings, we set the variable timeForForecast to
-a string which evaluates to a number, then we call the determineFullForecast function(this is what allows the user to change the time of
-day being displayed in their 5-day forecast).*/
+/*While it might not initially look like it, this is an event listener. First, we enter a for loop, where we initialize the variable i
+as 0, test if i is LESS THAN the length property of forecastTimes, and iterate i if so. Then, we attach an event listener to
+forecastTimes at an index, and upon a click we activate an event-driven anonymous function. Within this function, we initialize the
+variable clickedTime as the innerText property of the target of our click-event. Entering a chain of if and else/if statements, we check
+to see if clickedTime is equal to strings that evaluate to a time-of-day. If it is equal to these strings, we set the variable
+timeForForecast to a string which evaluates to a number, then we call the determineFullForecast function(this is what allows the user
+to change the time of day being displayed in their 5-day forecast).*/
 for(let i = 0; i < forecastTimes.length; i++){
   forecastTimes[i].addEventListener("click", (event)=>{
     let clickedTime = event.target.innerText;
