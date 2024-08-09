@@ -18,7 +18,7 @@
   ## Contributing
   N/A
   ## License
-  ### This app is licensed under the [N/A](This app has no license.) license.
+  ### This app has no applicable license.
   ## Questions
   * GitHub: [NickSchenck](https://github.com/NickSchenck)
   * Email: 
